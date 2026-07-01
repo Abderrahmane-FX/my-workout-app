@@ -1,1002 +1,258 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>تمرين البلانك</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مؤقتات المهام التصاعدية</title>
     <style>
-        /* ============================================================
-           تنسيقات عامة - بسيطة ونظيفة
-           ============================================================ */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        :root {
+            --bg-color: #121214;
+            --card-bg: #1a1a1e;
+            --accent-color: #4f46e5;
+            --accent-hover: #6366f1;
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --danger-color: #ef4444;
         }
 
         body {
-            background: #0d1b2a;
-            color: #e8edf3;
-            min-height: 100vh;
-            display: flex;
-            overflow: hidden;
-        }
-
-        /* ============================================================
-           القائمة الجانبية
-           ============================================================ */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 85%;
-            max-width: 320px;
-            height: 100%;
-            background: #152238;
-            padding: 25px 20px;
-            z-index: 1000;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            overflow-y: auto;
-            box-shadow: -10px 0 40px rgba(0,0,0,0.6);
-        }
-
-        .sidebar.open {
-            transform: translateX(0);
-        }
-
-        /* زر إغلاق القائمة - بدون دوران */
-        .sidebar-close-btn {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: rgba(255,255,255,0.08);
-            border: 2px solid rgba(255,255,255,0.15);
-            color: white;
-            font-size: 1.8rem;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-            font-weight: 300;
-        }
-
-        .sidebar-close-btn:hover {
-            background: rgba(255,255,255,0.15);
-        }
-
-        .sidebar-close-btn:active {
-            transform: scale(0.92);
-        }
-
-        .sidebar-title {
-            font-size: 1.6rem;
-            color: #6ecbb6;
-            margin: 10px 0 25px 0;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(255,255,255,0.06);
-            font-weight: 600;
-        }
-
-        /* ============================================================
-           الإعدادات في القائمة
-           ============================================================ */
-        .setting-group {
-            margin-bottom: 20px;
-        }
-
-        .setting-group label {
-            display: block;
-            color: #b0c9db;
-            font-size: 0.9rem;
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-
-        .setting-group .value-display {
-            color: #6ecbb6;
-            font-weight: 700;
-            font-size: 1.1rem;
-        }
-
-        .setting-group input[type="range"] {
-            width: 100%;
-            height: 6px;
-            background: #1e3450;
-            border-radius: 10px;
-            -webkit-appearance: none;
-            appearance: none;
-            outline: none;
-            margin: 8px 0;
-        }
-
-        .setting-group input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #6ecbb6;
-            cursor: pointer;
-            border: 3px solid #152238;
-            box-shadow: 0 0 10px rgba(110, 203, 182, 0.3);
-        }
-
-        .setting-group input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #6ecbb6;
-            cursor: pointer;
-            border: 3px solid #152238;
-        }
-
-        .setting-group select {
-            width: 100%;
-            padding: 10px 14px;
-            border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: #0d1b2a;
-            color: white;
-            font-size: 1rem;
-            outline: none;
-        }
-
-        .setting-group select:focus {
-            border-color: #6ecbb6;
-        }
-
-        .save-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 14px;
-            background: #6ecbb6;
-            color: #0d1b2a;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-            margin-top: 10px;
-        }
-
-        .save-btn:active {
-            transform: scale(0.97);
-        }
-
-        /* ============================================================
-           إحصائيات القائمة
-           ============================================================ */
-        .stats-box {
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
-            border-radius: 14px;
-            margin-top: 20px;
-        }
-
-        .stats-box .row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            font-size: 0.95rem;
-        }
-
-        .stats-box .row:last-child {
-            border-bottom: none;
-        }
-
-        .stats-box .value {
-            color: #6ecbb6;
-            font-weight: 700;
-        }
-
-        .reset-stats-btn {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 14px;
-            background: #5a3f4a;
-            color: #e8edf3;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            margin-top: 15px;
-        }
-
-        .reset-stats-btn:active {
-            transform: scale(0.97);
-        }
-
-        /* ============================================================
-           المحتوى الرئيسي
-           ============================================================ */
-        .main-content {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
             padding: 20px;
-            min-height: 100vh;
-            width: 100%;
-        }
-
-        .card {
-            width: 100%;
-            max-width: 420px;
-            padding: 30px 24px;
-            background: rgba(255,255,255,0.04);
-            border-radius: 40px;
-            border: 1px solid rgba(255,255,255,0.06);
-            text-align: center;
-            backdrop-filter: blur(10px);
-        }
-
-        /* زر فتح القائمة */
-        .menu-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: white;
-            font-size: 1.8rem;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.2s;
-            backdrop-filter: blur(8px);
-        }
-
-        .menu-btn:active {
-            transform: scale(0.9);
-        }
-
-        /* ============================================================
-           عناصر التمرين
-           ============================================================ */
-        .exercise-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 4px;
-        }
-
-        .exercise-desc {
-            color: #90b0c9;
-            font-size: 0.9rem;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .timer-circle {
-            width: 200px;
-            height: 200px;
-            margin: 10px auto 20px;
-            border-radius: 50%;
-            background: #0d1b2a;
-            border: 3px solid rgba(110, 203, 182, 0.2);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            box-shadow: inset 0 -4px 20px rgba(0,0,0,0.4), 0 0 40px rgba(110, 203, 182, 0.05);
         }
 
-        #timeDisplay {
-            font-size: 3.8rem;
-            font-weight: 700;
-            color: white;
-            letter-spacing: 2px;
-            line-height: 1;
-        }
-
-        #phaseLabel {
-            font-size: 1rem;
-            color: #90b0c9;
-            margin-top: 6px;
-            background: rgba(255,255,255,0.05);
-            padding: 4px 16px;
-            border-radius: 30px;
-            font-weight: 500;
-        }
-
-        .progress-bar {
+        .container {
             width: 100%;
-            height: 6px;
-            background: #1a2f44;
-            border-radius: 10px;
-            margin: 18px 0 20px;
-            overflow: hidden;
+            max-width: 800px;
         }
 
-        #progressFill {
-            height: 100%;
-            width: 0%;
-            background: #6ecbb6;
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
-
-        /* ============================================================
-           الإحصائيات السريعة
-           ============================================================ */
-        .quick-stats {
-            display: flex;
-            justify-content: space-around;
-            background: rgba(0,0,0,0.2);
-            padding: 14px 10px;
-            border-radius: 20px;
-            margin: 15px 0 20px;
-        }
-
-        .quick-stats .stat-item {
+        h1 {
             text-align: center;
+            color: #fff;
+            margin-bottom: 30px;
+            font-size: 2rem;
         }
 
-        .quick-stats .stat-item .label {
-            font-size: 0.7rem;
-            color: #90b0c9;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .quick-stats .stat-item .number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: white;
-            display: block;
-            margin-top: 2px;
-        }
-
-        .quick-stats .stat-item .number.green {
-            color: #6ecbb6;
-        }
-
-        /* ============================================================
-           زر واحد للبدء والإيقاف
-           ============================================================ */
-        .btn-group {
+        .input-section {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
             display: flex;
             gap: 10px;
-            justify-content: center;
+            margin-bottom: 30px;
         }
 
-        .btn {
-            padding: 16px 24px;
-            border: none;
-            border-radius: 16px;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.15s;
+        input[type="text"] {
             flex: 1;
-            color: white;
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        /* حالة البداية - أخضر */
-        .btn-start {
-            background: #6ecbb6;
-            color: #0d1b2a;
-            border: 1px solid rgba(110, 203, 182, 0.3);
-        }
-
-        /* حالة الإيقاف المؤقت - برتقالي */
-        .btn-pause {
-            background: #d4873a;
-            color: #0d1b2a;
-            border: 1px solid rgba(212, 135, 58, 0.3);
-        }
-
-        /* حالة الإيقاف النهائي - أحمر */
-        .btn-stopped {
-            background: #6a3f4a;
-            color: #e8edf3;
-            border: 1px solid rgba(106, 63, 74, 0.3);
-        }
-
-        /* زر إعادة الضبط - ثابت */
-        .btn-reset {
-            background: #2a3a50;
-            color: #e8edf3;
-            border: 1px solid rgba(255,255,255,0.06);
-            flex: 0.5;
-        }
-
-        .finish-message {
-            background: #1a3a35;
-            color: #6ecbb6;
             padding: 12px;
-            border-radius: 16px;
-            margin-top: 18px;
-            font-weight: 600;
-            display: none;
-            border: 1px solid rgba(110, 203, 182, 0.2);
+            border-radius: 8px;
+            border: 1px solid #374151;
+            background-color: #111827;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
         }
 
-        .finish-message.show {
-            display: block;
+        input[type="text"]:focus {
+            border-color: var(--accent-color);
         }
 
-        /* ============================================================
-           ظل خلفي عند فتح القائمة
-           ============================================================ */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            display: none;
+        button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            background-color: var(--accent-color);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
         }
 
-        .overlay.show {
-            display: block;
+        button:hover {
+            background-color: var(--accent-hover);
         }
 
-        /* ============================================================
-           تحسينات للهاتف
-           ============================================================ */
-        @media (max-width: 480px) {
-            .card {
-                padding: 20px 16px;
-                border-radius: 30px;
-            }
-
-            .timer-circle {
-                width: 170px;
-                height: 170px;
-            }
-
-            #timeDisplay {
-                font-size: 3rem;
-            }
-
-            .exercise-title {
-                font-size: 1.5rem;
-            }
-
-            .btn {
-                padding: 14px 16px;
-                font-size: 1rem;
-            }
-
-            .quick-stats .stat-item .number {
-                font-size: 1.2rem;
-            }
+        .timers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
         }
 
-        @media (max-width: 380px) {
-            .timer-circle {
-                width: 150px;
-                height: 150px;
-            }
+        .timer-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            border-top: 4px solid var(--accent-color);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
-            #timeDisplay {
-                font-size: 2.5rem;
-            }
+        .timer-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            word-break: break-word;
+        }
 
-            .btn {
-                font-size: 0.9rem;
-                padding: 12px 12px;
-            }
+        .time-display {
+            font-family: monospace;
+            font-size: 1.4rem;
+            color: #34d399;
+            direction: ltr;
+            text-align: center;
+            background: #111827;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .timer-date {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .delete-btn {
+            background-color: transparent;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+        }
+
+        .delete-btn:hover {
+            background-color: var(--danger-color);
+            color: white;
         }
     </style>
 </head>
 <body>
 
-    <!-- ============================================================
-    الطبقة الخلفية (للإغلاق عند الضغط خارج القائمة)
-    ============================================================ -->
-    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-
-    <!-- ============================================================
-    القائمة الجانبية
-    ============================================================ -->
-    <div class="sidebar" id="sidebar">
-        <!-- زر إغلاق القائمة - بدون دوران -->
-        <button class="sidebar-close-btn" onclick="closeSidebar()">✕</button>
-
-        <div class="sidebar-title">⚙️ الإعدادات</div>
-
-        <!-- مدة التمرين -->
-        <div class="setting-group">
-            <label>⏱️ مدة التمرين: <span class="value-display" id="workValue">30</span> ث</label>
-            <input type="range" id="workRange" min="5" max="120" value="30" />
-        </div>
-
-        <!-- مدة الراحة -->
-        <div class="setting-group">
-            <label>🔄 مدة الراحة: <span class="value-display" id="restValue">10</span> ث</label>
-            <input type="range" id="restRange" min="3" max="60" value="10" />
-        </div>
-
-        <!-- المدة الإجمالية -->
-        <div class="setting-group">
-            <label>⏰ المدة الإجمالية: <span class="value-display" id="totalValue">10</span> د</label>
-            <input type="range" id="totalRange" min="1" max="30" value="10" />
-        </div>
-
-        <!-- الصوت -->
-        <div class="setting-group">
-            <label>🔊 الصوت</label>
-            <select id="soundSelect">
-                <option value="true">مفعل</option>
-                <option value="false">معطل</option>
-            </select>
-        </div>
-
-        <button class="save-btn" onclick="saveSettings()">💾 حفظ الإعدادات</button>
-
-        <!-- الإحصائيات -->
-        <div class="stats-box">
-            <div class="row">
-                <span>الجولة الحالية</span>
-                <span class="value" id="sidebarRound">0</span>
-            </div>
-            <div class="row">
-                <span>إجمالي الجولات</span>
-                <span class="value" id="sidebarTotal">0</span>
-            </div>
-            <div class="row">
-                <span>🔥 السعرات</span>
-                <span class="value" id="sidebarCalories">0</span>
-            </div>
-            <div class="row">
-                <span>⏱️ الوقت المنقضي</span>
-                <span class="value" id="sidebarTime">00:00</span>
-            </div>
-        </div>
-
-        <button class="reset-stats-btn" onclick="resetStats()">🗑️ إعادة ضبط الإحصائيات</button>
+<div class="container">
+    <h1>⏱️ نظام المؤقتات التصاعدية المستمرة</h1>
+    
+    <div class="input-section">
+        <input type="text" id="timerName" placeholder="اكتب اسم المؤقت الجديد هنا... (مثال: تحدي الالتزام)">
+        <button onclick="createNewTimer()">بدء المؤقت</button>
     </div>
 
-    <!-- ============================================================
-    المحتوى الرئيسي
-    ============================================================ -->
-    <div class="main-content">
-        <!-- زر فتح القائمة -->
-        <button class="menu-btn" onclick="openSidebar()">☰</button>
+    <div class="timers-grid" id="timersContainer"></div>
+</div>
 
-        <div class="card">
-            <div class="exercise-title">⏱️ البلانك</div>
-            <div class="exercise-desc" id="exerciseDesc">30ث تمرين · 10ث راحة · 10 دقائق</div>
+<script>
+    // تحميل المؤقتات المحفوظة من الذاكرة المحلية عند فتح الصفحة
+    let timers = JSON.parse(localStorage.getItem('chronoTimers')) || [];
 
-            <!-- عداد التمرين -->
-            <div class="timer-circle">
-                <div id="timeDisplay">00:00</div>
-                <div id="phaseLabel">⏳ جاهز</div>
-            </div>
+    function saveTimers() {
+        localStorage.setItem('chronoTimers', JSON.stringify(timers));
+    }
 
-            <div class="progress-bar">
-                <div id="progressFill"></div>
-            </div>
+    function createNewTimer() {
+        const input = document.getElementById('timerName');
+        const name = input.value.trim();
+        
+        if (name === '') {
+            alert('الرجاء إدخال اسم للمؤقت أولاً!');
+            return;
+        }
 
-            <!-- إحصائيات سريعة -->
-            <div class="quick-stats">
-                <div class="stat-item">
-                    <span class="label">الجولة</span>
-                    <span class="number green" id="roundCount">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="label">المتبقي</span>
-                    <span class="number" id="totalRemain">10:00</span>
-                </div>
-                <div class="stat-item">
-                    <span class="label">🔥 سعرات</span>
-                    <span class="number green" id="calories">0</span>
-                </div>
-            </div>
-
-            <!-- زر واحد للبدء والإيقاف + زر إعادة -->
-            <div class="btn-group">
-                <button class="btn btn-start" id="mainBtn">▶ ابدأ</button>
-                <button class="btn btn-reset" id="resetBtn">⟲</button>
-            </div>
-
-            <div class="finish-message" id="finishAlert">🎉 أحسنت! أكملت التمرين 💪</div>
-        </div>
-    </div>
-
-    <!-- ============================================================
-    جافا سكريبت
-    ============================================================ -->
-    <script>
-        // ============================================================
-        //  الإعدادات
-        // ============================================================
-        let config = {
-            workSeconds: 30,
-            restSeconds: 10,
-            totalMinutes: 10,
-            soundEnabled: true
+        const newTimer = {
+            id: Date.now(),
+            name: name,
+            startTime: new Date().getTime() // يخزن لحظة البداية بالملي ثانية
         };
 
-        // ============================================================
-        //  الحالة
-        // ============================================================
-        let timer = null;
-        let paused = false;
-        let finished = false;
-        let totalRemaining = 600;
-        let phaseRemaining = 30;
-        let isWork = true;
-        let roundCount = 0;
+        timers.push(newTimer);
+        saveTimers();
+        renderTimers();
+        input.value = '';
+    }
 
-        // ============================================================
-        //  عناصر DOM
-        // ============================================================
-        const $ = id => document.getElementById(id);
+    function deleteTimer(id) {
+        if(confirm('هل أنت متأكد من حذف هذا المؤقت؟')) {
+            timers = timers.filter(timer => timer.id !== id);
+            saveTimers();
+            renderTimers();
+        }
+    }
 
-        const el = {
-            timeDisplay: $('timeDisplay'),
-            phaseLabel: $('phaseLabel'),
-            progressFill: $('progressFill'),
-            roundCount: $('roundCount'),
-            totalRemain: $('totalRemain'),
-            calories: $('calories'),
-            finishAlert: $('finishAlert'),
-            exerciseDesc: $('exerciseDesc'),
-            sidebarRound: $('sidebarRound'),
-            sidebarTotal: $('sidebarTotal'),
-            sidebarCalories: $('sidebarCalories'),
-            sidebarTime: $('sidebarTime'),
-            workRange: $('workRange'),
-            restRange: $('restRange'),
-            totalRange: $('totalRange'),
-            workValue: $('workValue'),
-            restValue: $('restValue'),
-            totalValue: $('totalValue'),
-            soundSelect: $('soundSelect'),
-            mainBtn: $('mainBtn'),
-            resetBtn: $('resetBtn'),
-        };
+    function formatTime(ms) {
+        let seconds = Math.floor(ms / 1000);
+        let minutes = Math.floor(seconds / 60);
+        let hours = Math.floor(minutes / 60);
+        let days = Math.floor(hours / 24);
 
-        // ============================================================
-        //  نظام الصوت
-        // ============================================================
-        const sound = {
-            ctx: null,
-            enabled: true,
+        seconds %= 60;
+        minutes %= 60;
+        hours %= 24;
 
-            init() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-            },
+        // إضافة صفر على اليسار إذا كان الرقم أقل من 10 لتناسق الشكل
+        const d = days;
+        const h = String(hours).padStart(2, '0');
+        const m = String(minutes).padStart(2, '0');
+        const s = String(seconds).padStart(2, '0');
 
-            beep(freq = 800, dur = 300) {
-                if (!this.enabled) return;
-                try {
-                    this.init();
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.frequency.value = freq;
-                    osc.type = 'sine';
-                    gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + dur / 1000);
-                    osc.start(this.ctx.currentTime);
-                    osc.stop(this.ctx.currentTime + dur / 1000);
-                } catch(e) {}
-            },
+        return `${d}d : ${h}h : ${m}m : ${s}s`;
+    }
 
-            workEnd() {
-                this.beep(880, 350);
-                setTimeout(() => this.beep(1100, 300), 180);
-            },
-
-            restEnd() {
-                this.beep(660, 300);
-                setTimeout(() => this.beep(880, 350), 220);
-            },
-
-            finish() {
-                [0, 200, 400, 600].forEach((d, i) => {
-                    setTimeout(() => this.beep(880 + i * 90, 200), d);
-                });
+    function updateDisplays() {
+        const now = new Date().getTime();
+        timers.forEach(timer => {
+            const displayElement = document.getElementById(`display-${timer.id}`);
+            if (displayElement) {
+                const diff = now - timer.startTime;
+                displayElement.innerText = formatTime(diff);
             }
-        };
+        });
+    }
 
-        // ============================================================
-        //  تحديث زر التحكم الرئيسي
-        // ============================================================
-        function updateMainButton() {
-            if (finished) {
-                el.mainBtn.textContent = '✅ تم';
-                el.mainBtn.className = 'btn btn-stopped';
-                el.mainBtn.disabled = true;
-                return;
-            }
+    function renderTimers() {
+        const container = document.getElementById('timersContainer');
+        container.innerHTML = '';
 
-            if (timer && !paused) {
-                // التمرين يعمل
-                el.mainBtn.textContent = '⏸ إيقاف';
-                el.mainBtn.className = 'btn btn-pause';
-                el.mainBtn.disabled = false;
-            } else {
-                // التمرين موقف
-                el.mainBtn.textContent = '▶ ابدأ';
-                el.mainBtn.className = 'btn btn-start';
-                el.mainBtn.disabled = false;
-            }
-        }
+        timers.forEach(timer => {
+            const startDate = new Date(timer.startTime).toLocaleString('ar-EG', {
+                hour12: true,
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
 
-        // ============================================================
-        //  تحديث الواجهة
-        // ============================================================
-        function updateUI() {
-            const m = Math.floor(phaseRemaining / 60);
-            const s = Math.floor(phaseRemaining % 60);
-            el.timeDisplay.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            const card = document.createElement('div');
+            card.className = 'timer-card';
+            card.innerHTML = `
+                <div class="timer-title">${timer.name}</div>
+                <div class="time-display" id="display-${timer.id}">0d : 00h : 00m : 00s</div>
+                <div class="timer-date">بدأ في: ${startDate}</div>
+                <button class="delete-btn" onclick="deleteTimer(${timer.id})">حذف المؤقت</button>
+            `;
+            container.appendChild(card);
+        });
+        
+        // تحديث فوري للأرقام بعد الرندرة
+        updateDisplays();
+    }
 
-            if (finished) {
-                el.phaseLabel.textContent = '✅ انتهى';
-            } else if (paused || !timer) {
-                el.phaseLabel.textContent = '⏸ متوقف';
-            } else {
-                el.phaseLabel.textContent = isWork ? '🔥 تمرين' : '💨 راحة';
-            }
+    // تحديث العدادات كل ثانية واحدة
+    setInterval(updateDisplays, 1000);
 
-            const progress = ((config.totalMinutes * 60 - totalRemaining) / (config.totalMinutes * 60)) * 100;
-            el.progressFill.style.width = Math.min(progress, 100) + '%';
-
-            el.roundCount.textContent = roundCount;
-
-            const tm = Math.floor(totalRemaining / 60);
-            const ts = Math.floor(totalRemaining % 60);
-            el.totalRemain.textContent = `${String(tm).padStart(2, '0')}:${String(ts).padStart(2, '0')}`;
-
-            const calories = Math.round(roundCount * 0.5);
-            el.calories.textContent = calories;
-
-            if (finished) {
-                el.finishAlert.classList.add('show');
-            } else {
-                el.finishAlert.classList.remove('show');
-            }
-
-            // تحديث القائمة الجانبية
-            el.sidebarRound.textContent = roundCount;
-            el.sidebarCalories.textContent = calories;
-
-            const elapsed = config.totalMinutes * 60 - totalRemaining;
-            const em = Math.floor(elapsed / 60);
-            const es = Math.floor(elapsed % 60);
-            el.sidebarTime.textContent = `${String(em).padStart(2, '0')}:${String(es).padStart(2, '0')}`;
-
-            const total = parseInt(localStorage.getItem('total_plank')) || 0;
-            el.sidebarTotal.textContent = total;
-
-            // تحديث زر التحكم
-            updateMainButton();
-        }
-
-        // ============================================================
-        //  التكرار كل ثانية
-        // ============================================================
-        function tick() {
-            if (finished || paused) return;
-
-            phaseRemaining--;
-            totalRemaining--;
-
-            if (phaseRemaining <= 0) {
-                if (isWork) {
-                    roundCount++;
-                    sound.workEnd();
-                    isWork = false;
-                    phaseRemaining = config.restSeconds;
-                    saveRounds();
-                } else {
-                    sound.restEnd();
-                    isWork = true;
-                    phaseRemaining = config.workSeconds;
-                }
-            }
-
-            if (totalRemaining <= 0) {
-                totalRemaining = 0;
-                phaseRemaining = 0;
-                finished = true;
-                if (timer) {
-                    clearInterval(timer);
-                    timer = null;
-                }
-                sound.finish();
-                el.phaseLabel.textContent = '✅ انتهى';
-                saveRounds();
-                updateUI();
-                return;
-            }
-
-            updateUI();
-        }
-
-        // ============================================================
-        //  زر التحكم الرئيسي - بدء / إيقاف
-        // ============================================================
-        function toggleTimer() {
-            if (finished) return;
-
-            if (timer && !paused) {
-                // التمرين يعمل → نوقفه مؤقتاً
-                clearInterval(timer);
-                timer = null;
-                paused = true;
-                updateUI();
-            } else {
-                // التمرين موقف → نبدأه
-                if (timer) {
-                    clearInterval(timer);
-                    timer = null;
-                }
-                paused = false;
-                timer = setInterval(tick, 1000);
-                updateUI();
-            }
-        }
-
-        // ============================================================
-        //  إعادة الضبط
-        // ============================================================
-        function resetTimer() {
-            if (timer) {
-                clearInterval(timer);
-                timer = null;
-            }
-            totalRemaining = config.totalMinutes * 60;
-            phaseRemaining = config.workSeconds;
-            isWork = true;
-            roundCount = 0;
-            paused = false;
-            finished = false;
-            el.finishAlert.classList.remove('show');
-            el.phaseLabel.textContent = '⏳ جاهز';
-            el.mainBtn.disabled = false;
-            updateUI();
-        }
-
-        // ============================================================
-        //  حفظ الجولات
-        // ============================================================
-        function saveRounds() {
-            const total = (parseInt(localStorage.getItem('total_plank')) || 0) + roundCount;
-            localStorage.setItem('total_plank', total);
-            localStorage.setItem('rounds_plank', JSON.stringify({
-                rounds: roundCount,
-                date: new Date().toISOString(),
-                total: total
-            }));
-            updateUI();
-        }
-
-        // ============================================================
-        //  الإعدادات
-        // ============================================================
-        function updateRangeLabels() {
-            el.workValue.textContent = el.workRange.value;
-            el.restValue.textContent = el.restRange.value;
-            el.totalValue.textContent = el.totalRange.value;
-        }
-
-        el.workRange.addEventListener('input', updateRangeLabels);
-        el.restRange.addEventListener('input', updateRangeLabels);
-        el.totalRange.addEventListener('input', updateRangeLabels);
-
-        function saveSettings() {
-            const work = parseInt(el.workRange.value) || 30;
-            const rest = parseInt(el.restRange.value) || 10;
-            const total = parseInt(el.totalRange.value) || 10;
-
-            config.workSeconds = Math.max(5, Math.min(120, work));
-            config.restSeconds = Math.max(3, Math.min(60, rest));
-            config.totalMinutes = Math.max(1, Math.min(30, total));
-            config.soundEnabled = el.soundSelect.value === 'true';
-            sound.enabled = config.soundEnabled;
-
-            el.exerciseDesc.textContent = `${config.workSeconds}ث تمرين · ${config.restSeconds}ث راحة · ${config.totalMinutes} دقائق`;
-
-            localStorage.setItem('plankConfig', JSON.stringify(config));
-
-            resetTimer();
-
-            // تأثير تأكيد
-            const btn = document.querySelector('.save-btn');
-            const orig = btn.textContent;
-            btn.textContent = '✅ تم';
-            setTimeout(() => btn.textContent = orig, 1200);
-
-            closeSidebar();
-        }
-
-        function loadSettings() {
-            const saved = localStorage.getItem('plankConfig');
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    config = { ...config, ...parsed };
-                    sound.enabled = config.soundEnabled;
-                    el.workRange.value = config.workSeconds;
-                    el.restRange.value = config.restSeconds;
-                    el.totalRange.value = config.totalMinutes;
-                    el.soundSelect.value = config.soundEnabled ? 'true' : 'false';
-                    updateRangeLabels();
-                    el.exerciseDesc.textContent = `${config.workSeconds}ث تمرين · ${config.restSeconds}ث راحة · ${config.totalMinutes} دقائق`;
-                } catch(e) {}
-            }
-        }
-
-        // ============================================================
-        //  إعادة ضبط الإحصائيات
-        // ============================================================
-        function resetStats() {
-            if (confirm('هل أنت متأكد؟ سيتم حذف جميع الإحصائيات!')) {
-                localStorage.removeItem('total_plank');
-                localStorage.removeItem('rounds_plank');
-                roundCount = 0;
-                updateUI();
-                const btn = document.querySelector('.reset-stats-btn');
-                const orig = btn.textContent;
-                btn.textContent = '✅ تم المسح';
-                setTimeout(() => btn.textContent = orig, 1200);
-            }
-        }
-
-        // ============================================================
-        //  فتح وإغلاق القائمة
-        // ============================================================
-        function openSidebar() {
-            document.getElementById('sidebar').classList.add('open');
-            document.getElementById('overlay').classList.add('show');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.remove('open');
-            document.getElementById('overlay').classList.remove('show');
-            document.body.style.overflow = '';
-        }
-
-        // ============================================================
-        //  ربط الأزرار
-        // ============================================================
-        el.mainBtn.addEventListener('click', toggleTimer);
-        el.resetBtn.addEventListener('click', resetTimer);
-
-        // ============================================================
-        //  التهيئة
-        // ============================================================
-        function init() {
-            loadSettings();
-            resetTimer();
-            updateUI();
-            // تحميل إجمالي الجولات
-            const total = parseInt(localStorage.getItem('total_plank')) || 0;
-            el.sidebarTotal.textContent = total;
-        }
-
-        init();
-    </script>
+    // تشغيل النظام عند فتح الصفحة لأول مرة
+    renderTimers();
+</script>
 
 </body>
 </html>
